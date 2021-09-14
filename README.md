@@ -4,3 +4,5 @@ Current JSON signature mechanisms, e.g. JWS, are external and "enveloping", and 
 like chaining, partial signing (signing only a subset of the document), or multiple signatures.  The short-term goal of this
 repo is to define an extension that can be used in WoT TDs for signing.  The long-term goal is to establish a basis for
 an enveloped JSON signature standard that can be used for any JSON content.
+
+A rendered version of the current draft can be found [here](https://w3c.github.io/wot-ejs/).
