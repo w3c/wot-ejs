@@ -1,0 +1,686 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Enveloped JSON Signature</title>
+  <script src="https://www.w3.org/Tools/respec/respec-w3c" class="remove"></script>
+  <script class='remove'>
+    var respecConfig = {
+        specStatus:     "ED"
+      , noRecTrack:     "true"
+      , processVersion: 2020
+      , shortName:      "wot-ejs"
+      , copyrightStart: 2021
+      , group:          "wg/wot"
+      , edDraftURI:     "https://w3c.github.io/wot-ejs/"
+      , github:         "https://github.com/w3c/wot-ejs"
+      , issueBase:      "https://www.github.com/w3c/wot-ejs/issues"
+      , editors: [
+        {
+          name:       "Michael McCool"
+        , w3cid:      "93137"
+        , company:    "Intel"
+        , companyURL: "https://www.intel.com/"
+        }
+      ]
+      , otherLinks: [
+        {
+          key: "Contributors"
+        , data: [
+            {
+              value: "In the GitHub repository"
+            , href: "https://github.com/w3c/wot-ejs/graphs/contributors"
+            }
+          ]
+        }
+        , {
+            key: "Repository"
+          , data: [
+              {
+                value: "We are on GitHub"
+              , href: "https://github.com/w3c/wot-ejs/"
+              }
+            , {
+                value: "File a bug"
+              , href: "https://github.com/w3c/wot-ejs/issues"
+              }
+            , {
+                value: "Contribute"
+              , href: "https://github.com/w3c/wot-ejs/pulls"
+              }
+            ]
+          }
+        ]
+        , localBiblio: {
+                "JSON-SCHEMA": {
+                  title:    "JSON Schema Validation: A Vocabulary for Structural Validation of JSON"
+                , href:     "https://tools.ietf.org/html/draft-handrews-json-schema-validation-01"
+                , authors: [
+                    "Austin Wright"
+                  , "Henry Andrews"
+                  , "Geraint Luff"
+                  ]
+                , status:   "Internet-Draft"
+                , date: "19 March 2018"
+                , publisher:  "IETF"
+                }
+              , "OPENAPI": {
+                  title:    "OpenAPI Specification: Version 3.0.1"
+                , href:     "https://swagger.io/specification/"
+                , authors:  [
+                    "Darrel Miller"
+                  , "Jason Harmon"
+                  , "Jeremy Whitlock"
+                  , "Kris Hahn"
+                  , "Marsh Gardiner"
+                  , "Mike Ralphson"
+                  , "Rob Dolin"
+                  , "Ron Ratovsky"
+                  , "Tony Tam"
+                  ]
+                , publisher: "OpenAPI Initiative, Linux Foundation"
+                , date: "7 December 2017"
+                }
+              , "SEMVER": {
+                  title:    "Semantic Versioning 2.0.0"
+                , href:     "https://semver.org/"
+                , authors:  ["Tom Preston-Werner"]
+                , date: "26 December 2017"
+                }
+              , "WOT-ARCHITECTURE": {
+                  title: "Web of Things (WoT) Architecture 1.1"
+                , href: "https://www.w3.org/TR/wot-architecture11/"
+                , authors:  [
+                    "Michael Lagally"
+                  , "Ryuichi Matsukura"
+                  , "Toru Kawaguchi"
+                  , "Kunihiko Toumura"
+                  , "Kazuo Kajimoto"
+                  ]
+                , publisher: "W3C"
+                , date: "November 2020"
+                }
+              , "WOT-SECURITY-GUIDELINES": {
+                title: "Web of Things (WoT) Security and Privacy Guidelines"
+                //, href: "https://www.w3.org/TR/wot-security/"
+                , href: "https://w3c.github.io/wot-security/"
+                , authors:  [
+                  , "Michael McCool"
+                  , "Elena Reshetova"
+                  ]
+                , publisher: "W3C"
+                , date: "March 2019"
+                }
+              , "MQTT": {
+                  title: "MQTT Version 3.1.1"
+                , href: "http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/mqtt-v3.1.1.html"
+                , authors:  [
+                    "Andrew Banks",
+                    "Rahul Gupta"
+                  ]
+                , publisher: "OASIS"
+                , date: "10 December 2015"
+                , status: "OASIS Standard Incorporating Approved Errata 01"
+                }
+              , "ACE": {
+                  title: "Authentication and Authorization for Constrained Environments (ACE) using the OAuth 2.0 Framework (ACE-OAuth)"
+                , href: "https://tools.ietf.org/html/draft-ietf-ace-oauth-authz-24"
+                , authors:  [
+                    "L. Seitz",
+                    "G. Selander",
+                    "E. Wahlstroem",
+                    "S. Erdtman",
+                    "H. Tschofenig"
+                  ]
+                , publisher: "IETF"
+                , date: "27 March 2019"
+                , status: "Internet-Draft"
+                },
+                "RIJGERSBERG": {
+                    "href": "http://www.semantic-web-journal.net/content/ontology-units-measure-and-related-concepts",
+                    "authors": [
+                        "Hajo Rijgersberg",
+                        "Mark van Assem",
+                        "Jan Top"
+                    ],
+                    "title": "Ontology of Units of Measure and Related Concepts",
+                    "publisher": "Semantic Web journal, IOS Press",
+                    "date": "2013"
+                },
+                "LDML": {
+                    "title": "Unicode Technical Standard #35: Unicode Locale Data Markup Language (LDML)",
+                    "href": "https://unicode.org/reports/tr35/",
+                    "authors": [
+                        "Mark Davis",
+                        "CLDR Contributors"
+                    ]
+                },
+                "JSON-SCHEMA-ONTOLOGY": {
+                  "title": "JSON Schema in RDF"
+                , "href": "https://www.w3.org/2019/wot/json-schema"
+                , "authors": [
+                        "Victor Charpenay",
+                        "Maxime Lefrançois",
+                        "María Poveda Villalón"
+                  ]
+                , publisher: "W3C"
+                }
+              }
+            };
+    </script>
+<style>
+a[href].internalDFN {
+    color: inherit;
+    border-bottom: 1px solid #99c;
+    text-decoration: none;
+}
+
+.example {
+    border-color: #EA1252;
+    background: #FEF11E;
+    counter-increment: example;
+    overflow: auto;
+    clear: both;
+}
+
+.with-default .with-default-control {
+    margin-top: 1em;
+    margin-bottom: 1em;
+}
+
+.with-default pre.selected {
+    margin-top: 0;
+    margin-bottom: 1em;
+    height: auto;
+}
+
+.with-default pre {
+    margin-top: 0;
+    margin-bottom: 0;
+    height: 0;
+}
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // let ReSpec do syntax highlighting first
+        document.respec.ready.then(() => {
+            document.querySelectorAll('.with-default').forEach(n => {
+                let wo = n.querySelector('pre:nth-of-type(1)');
+                let w = n.querySelector('pre:nth-of-type(2)');
+                let cbox = n.querySelector('.with-default-control input[type="checkbox"]');
+
+                w.classList.add('selected');
+                cbox.checked = true;
+
+                cbox.addEventListener('change', e => {
+                    if (e.target.checked) {
+                        // with default
+                        w.classList.add('selected');
+                        wo.classList.remove('selected');
+                    } else {
+                        // without
+                        w.classList.remove('selected');
+                        wo.classList.add('selected');
+                    }
+                });
+            });
+        });
+    });
+</script>
+<script>
+  function openTab(example, tabClass) {
+    var i;
+    var x = document.getElementsByClassName(example);
+    for (i = 0; i < x.length; i++) {
+    x[i].classList.remove("selected");
+    if ( x[i].classList.contains(tabClass) ) {
+      x[i].classList.add("selected");
+    }
+    }
+  }
+</script>
+<style>
+  /* example tab selection */
+  .ds-selector-tabs {
+    padding-bottom: 2em;
+  }
+  .ds-selector-tabs .selectors {
+    padding: 0;
+    border-bottom: 1px solid #ccc;
+    height: 28px;
+  }
+  .ds-selector-tabs .selectors button {
+    display: inline-block;
+    min-width: 54px;
+    text-align: center;
+    font-size: 11px;
+    font-weight: bold;
+    height: 27px;
+    padding: 0 8px;
+    line-height: 27px;
+    transition: all,0.218s;
+    border-top-right-radius: 2px;
+    border-top-left-radius: 2px;
+    color: #666;
+    border: 1px solid transparent;
+  }
+  .ds-selector-tabs .selectors button:first-child {
+    margin-left: 2px;
+  }
+  .ds-selector-tabs .selectors button.selected {
+    color: #202020 !important;
+    border: 1px solid #ccc;
+    border-bottom: 1px solid #fff !important;
+  }
+  .ds-selector-tabs .selectors button:hover {
+    background-color: transparent;
+    color: #202020;
+    cursor: pointer;
+  }
+  .ds-selector-tabs pre, .ds-selector-tabs table {
+    display: none;
+  }
+  .ds-selector-tabs pre.selected, .ds-selector-tabs table.selected {
+    display: block;
+  }
+  a.playground {
+    display: inline-block;
+    width: 150px;
+    border: 1px solid transparent;
+    border-top-right-radius: 2px;
+    border-top-left-radius: 2px;
+    background-color: rgb(192, 192, 192);
+    text-decoration: none;
+    font-size: 13px;
+    margin-bottom: 10px;
+  }
+  a[href].playground {
+    padding: 4px 0 3px 8px;
+    border-bottom: none;
+    text-decoration: none;
+    color: #666;
+  }
+</style>
+<!-- END EXTRA TABS -->
+<!-- ASSERTION HIGHLIGHTING -->
+<style>
+.rfc2119-assertion {
+  background-color: rgb(230,230,230)
+}
+.at-risk {
+  background-color: yellow;
+}
+
+</style>
+<!-- END ASSERTION HIGHLIGHTING -->
+
+</head>
+<body>
+<section id="abstract">
+  <p>This document describes a mechanism to add enveloped signatures 
+     to JSON objects.  This mechanism combines the signing and key management of JWS
+     with a subset of the features of XML Signatures.  
+     Unlike JWS, it supports multiple signatures, selective signatures over 
+     only part of the information in the document, and canonicalization.
+  </p>
+  <p>This specification is designed to be usable to sign WoT Thing Descriptions [[WOT-THING-DESCRIPTION]],
+     although it is not limited to this use case.
+     An ontology is also defined so it can be used with JSON-LD.  However, it is
+     designed to only require JSON processing, not RDF.
+  </p>
+</section>
+
+<section id="sotd">
+  <!-- automatically generated -->
+</section>
+
+<section id="introduction" class="informative">
+  <h1>Introduction</h1>
+  <p>To do.  Examples should go here.
+  </p>
+</section>
+<section id="vocabulary">
+  <h2>Vocabulary Definitions</h2>
+  <p>This section defines a <code>Signature</code> object and signing process that
+     can be used to preserve the integrity of all or part of a JSON object.
+  </p>
+  <section>
+  <h3><code>SignedInfo</code></h3>
+  <p>A collection of information to be protected by a <code>Signature</code>, 
+     including a reference (which may be one of several query types) to
+     a subset of the enclosing <a>JSON</a> object, 
+     a digest (hash) of the reference result, and
+     an identification of the digest algorithms used.
+  </p>
+  <table class="def">
+    <thead>
+       <tr>
+          <th><a>Vocabulary term</a></th>
+          <th>Description</th>
+          <th>Assignment</th>
+          <th>Type</th>
+       </tr>
+    </thead>
+    <tbody>
+       <tr class="rfc2119-table-assertion" id="vocab-reference--SignedInfo">
+          <td><code>reference</code></td>
+          <td>Pointer or query string identifying the subset of the enclosing JSON object to sign.</td>
+          <td>mandatory</td>
+          <td><a href="http://www.w3.org/TR/2012/REC-xmlschema11-2-20120405/#string"><code>string</code></a></td>
+       </tr>
+          <tr class="rfc2119-table-assertion" id="vocab-referenceType--SignedInfo">
+            <td><code>referenceType</code></td>
+            <td>The type of reference used to define the subset of the enclosing JSON object to sign.  
+                Can be one of <code>jsonpointer</code>, <code>jsonpath</code>, or <code>xpath</code>.</td>
+          <td>mandatory</td>
+          <td><a href="http://www.w3.org/TR/2012/REC-xmlschema11-2-20120405/#string"><code>string</code></a></td>
+       </tr>
+       <tr class="rfc2119-table-assertion" id="vocab-digest--SignedInfo">
+          <td><code>digest</code></td>
+          <td>A digest value computed from the result of the specified reference.</td>
+          <td>mandatory</td>
+          <td><a href="http://www.w3.org/TR/2012/REC-xmlschema11-2-20120405/#string"><code>string</code></a></td>
+       </tr>
+       <tr class="rfc2119-table-assertion" id="vocab-digestAlg--SignedInfo">
+          <td><code>digestAlg</code></td>
+          <td>The algorithm used to compute the digest value.  One of 
+              <code>sha256</code>, <code>sha384</code>, or <code>sha512</code>.
+          </td><td>mandatory</td>
+          <td><a href="http://www.w3.org/TR/2012/REC-xmlschema11-2-20120405/#string"><code>string</code></a></td>
+       </tr>
+    </tbody>
+  </table>
+  </section>
+  <section>
+     <h3><code>Signature</code></h3>
+     <p>A <code>Signature</code> object includes an array of <code>SignedInfo</code> objects and 
+        an encrypted value which can be used to confirm that the 
+        content of this array and the information it references is identical to that which was present
+        when the <code>Signature</code> object was created.
+     </p>
+     <table class="def">
+       <thead>
+         <tr>
+           <th><a>Vocabulary term</a></th>
+           <th>Description</th>
+           <th>Assignment</th>
+           <th>Type</th>
+         </tr>
+       </thead>
+       <tbody>
+         <tr class="rfc2119-table-assertion" id="vocab-signedInfo--Signature">
+           <td><code>signedInfo</code></td>
+           <td>Information to be signed.</td>
+           <td>mandatory</td>
+           <td><a href="#signedinfo"><code>SignedInfo</code></a> or <a>Array</a> of <a href="#signedinfo"><code>SignedInfo</code></a></td>
+         </tr>
+         <tr class="rfc2119-table-assertion" id="vocab-sig--Signature">
+           <td><code>sig</code></td>
+           <td>JWS [[RFC7515]] signature value computed using the
+               JSON canonicalized serialization of the <code>signedInfo</code> 
+               field as payload and header set using
+               corresponding fields from the <code>Signature</code> object.</td>
+           <td>mandatory</td>
+           <td><a href="http://www.w3.org/TR/2012/REC-xmlschema11-2-20120405/#string"><code>string</code></a></td>
+         </tr>
+         <tr class="rfc2119-table-assertion" id="vocab-alg--Signature">
+           <td><code>alg</code></td>
+           <td>The algorithm used to compute the
+               signature value. Can be any digital signature or MAC algorithm
+               specified in either [[RFC7518]] or
+               [[RFC8037]] corresponding to values of <code>alg</code> allowable
+               in JWS [[RFC7515]].  
+               These include <code>HS256</code>, <code>HS384</code>, <code>HS512</code>, <code>RS256</code>,
+               <code>RS384</code>, <code>RS512</code>, <code>ES256</code>, <code>ES384</code>, <code>ES512</code>,
+               <code>PS256</code>, <code>PS384</code>, or <code>PS512</code> from [[RFC7518]] and
+               <code>Ed25519</code> or <code>Ed448</code> from [[RFC8037]].
+               Considered part of the JWS header used for computing the signature value.</td>
+           <td>mandatory</td>
+           <td><a href="http://www.w3.org/TR/2012/REC-xmlschema11-2-20120405/#string"><code>string</code></a></td>
+         </tr>
+         <tr class="rfc2119-table-assertion" id="vocab-jku--Signature">
+           <td><code>jku</code></td>
+           <td>A URI referring to a JWK Set [[RFC7517]].
+               Considered part of the JWS header used for computing the signature value.</td>
+           <td>mandatory</td>
+           <td><a href="http://www.w3.org/TR/2012/REC-xmlschema11-2-20120405/#anyURI"><code>anyURI</code></a></td>
+         </tr>
+         <tr class="rfc2119-table-assertion" id="vocab-kid--Signature">
+           <td><code>kid</code></td>
+           <td>An identifier specifying an element of a JWK Set [[RFC7517]].
+               Considered part of the JWS header used for computing the signature value.</td>
+           <td>mandatory</td>
+           <td><a href="http://www.w3.org/TR/2012/REC-xmlschema11-2-20120405/#string"><code>string</code></a></td>
+         </tr>
+       </tbody>
+     </table>
+  </section>
+</section>
+<section>
+  <h3>Processing</h3>
+  <section>
+     <h3>Signature Generation</h3>
+     <p><code>Signature</code> objects are used to verify the integrity of
+        a specified subset of the information contained in a JSON object.
+        Generally speaking, <code>Signature</code> objects
+        follow the structure of XML Signatures [[xmldsig-core1]] to enable flexible
+        extraction of the subset of information to be signed, that is, the payload.
+        However, signature algorithms are drawn from JSON Web Algorithms (JWA) [[RFC7518]] and extensions [[RFC8037]]
+        consistent with their use in JSON Web Signatures (JWS) [[RFC7515]].
+        The signature value itself is computed by constructing a JWS header from
+        the information contained in the <code>Signature</code> object and using it to sign
+        the specified payload.
+      </p>
+      <p>
+      <span class="rfc2119-assertion" id="signature-computation">
+      Each <code>Signature</code> object and the array containing all
+      signatures MUST be computed (and the array extended) as described below:
+      </span>
+      <ol>
+      <li>
+      <span class="rfc2119-assertion" id="signature-computation--initial-signature-object">
+      As input, 
+      the signer MUST construct a template for a <code>Signature</code>
+      object, with all mandatory fields filled in except for <code>digest</code> fields
+      and <code>sig</code> values.  If a key needs to be specfied, 
+      then appropriate values for both
+      <code>jku</code> and <code>kid</code> fields should be given.
+      If values for these fields are not given, then the key will have to be known to the Consumer
+      by context.
+      </span>
+      </li>
+      <li>
+      <span class="rfc2119-assertion" id="signature-computation--template">
+      The template <code>Signature</code> object
+      MUST then be inserted into the JSON object
+      to be signed, at the end of the <code>signatures</code> array,
+      creating a new array if necessary.</span>
+      This allows <code>SignedInfo</code> sections of the template
+      to optionally refer to (and therefore protect, if necessary) elements
+      of the <code>Signature</code> object itself, such as the
+      definition of the signature algorithm.
+      <li>
+      <span class="rfc2119-assertion" id="signature-computation--canonicalization">
+        (Fragments are canonicalized below; this assertion covers the signature block itself)
+      The JSON object serialization must be expressed as in JCS (canonical) form.
+      </span>
+      </li>
+      <li>
+      <span class="rfc2119-assertion" id="td-signature-computation--name-expansion">
+        (Move to TD Canonical form)
+      References to named objects MUST be expanded. Specifically, whenever 
+      a <code>security</code> or <code>schema</code> refers to an object
+      defined in a <code>securityDefinition</code> or <code>schemaDefinition</code>,
+      the string (and its enclosing quotes) 
+      must be replaced with the object it refers to.
+      </span>
+      </li>
+      <li>
+      <span class="rfc2119-assertion" id="td-signature-computation--prefix-expansion">
+        (Move to TD Canonical form)
+      Prefixes MUST all be expanded into URLs wherever they are used. Note: the
+      <code>@context</code> object should be retained as is.
+      </span>
+      </li>
+      <li>
+      <span class="rfc2119-assertion" id="signature-computation--ref-results">
+      All <code>reference</code> queries 
+      MUST be applied to the output of the previous step
+      to extract a result for each <code>SignedInfo</code> object.
+      </span>
+      <span class="rfc2119-assertion" id="td-signature-computation--ref-canonicalization">
+      Each <code>reference</code> 
+      result may be a JSON fragment or a JSON element,  
+      and MUST be
+      transformed into JSON Canonical Serialization [[RFC8785]] form.
+      </span>
+      </li>
+      <li>
+      <span class="rfc2119-assertion" id="td-signature-computation--digest">
+      A <code>digest</code> value MUST be computed 
+      using the specified <code>digestAlg</code>
+      from the output of the previous step
+      for each <code>SignedInfo</code> object.  
+      These values are then inserted into the corresponding
+      <code>SignedInfo</code> objects.
+      </span>
+      </li>
+      <li>
+      <span class="rfc2119-assertion" id="td-signature-computation--payload">
+      The array of <code>SignedInfo</code> objects MUST be serialized in JSON Canonical Serialization
+      [[RFC8785]] form.  
+      This string will be used as the JWS payload.
+      </span>
+      </li>
+      <li>
+      <span class="rfc2119-assertion" id="td-signature-computation--header">
+      A JSON object MUST be created using the <code>alg</code> value as well as the
+      <code>jku</code> and <code>kid</code> values, if specified,
+      from the <code>Signature</code> object, using corresponding member names,
+      and then serialized in JSON Canonical Serialization [[RFC8785]] form.
+      This string will be used as the JWS header.
+      </span>
+      </li>
+      <li>
+      <span class="rfc2119-assertion" id="td-signature-computation--sign">
+      Using the header and the payload computed in the previous steps, the signature value MUST 
+      then computed as specified for JSON Web Signatures [[RFC7515]].
+      the resulting string to compute a signature value.  This value is then inserted into the
+      <code>sig</code> field of the template <code>Signature</code> object, which is now complete,
+      with all mandatory elements specified.
+      </span>
+      </li>
+      <li>
+      <span class="rfc2119-assertion" id="td-signature-computation--insertion">
+      The completed <code>Signature</code> object MUST be inserted
+      into the JSON object, replacing the already inserted
+      template object. 
+      </span>
+      </li>
+      </ol>
+      </p>
+  </section>
+  <section>
+     <h3>Signature Verification</h3>
+       <p><span class="rfc2119-assertion" id="td-signature-validation">
+      To verify a signature, the following process MUST be followed:
+      </span>
+      <ol>
+      <li>
+      <span class="rfc2119-assertion" id="td-signature-validation--extraction">
+      The identified <code>Signature</code> object and all <code>Signature</code>
+      objects following it in the array associated with the <code>signatures</code>
+      member MUST be removed from the JSON object.
+      </span>
+      If the resulting array is empty it should be removed.
+      </li>
+      <li>
+      <span class="rfc2119-assertion" id="td-signature-validation--template-recon">
+      A template <code>Signature</code> object MUST be reconstructed
+      by deleting the <code>digest</code> and <code>sig</code> fields
+      and reinserting it at the end of the <code>signatures</code> array,
+      (re)creating the <code>signatures</code> array if necessary.
+      </span>
+      </li>
+      <li>
+      <span class="rfc2119-assertion" id="td-signature-validation--canonicalization">
+        (Move to TD specification)
+      The <a>TD</a> serialization MUST be expressed as a <a>Canonical TD</a>,
+      with the same validation exception for the most recent <code>Signature</code> 
+      object being incomplete noted above.
+      </span>
+      </li>
+      <li>
+      <span class="rfc2119-assertion" id="td-signature-validation--name-expansion">
+        (Move to TD specification)
+      References to named objects MUST be replaced with their
+      referents as described for the signing process.
+      </span>
+      </li>
+      <li>
+      <span class="rfc2119-assertion" id="td-signature-validation--prefix-expansion">
+        (Move to TD specification)
+      References to prefixes MUST be replaced with their
+      referents as described for the signing process.
+      </span>
+      </li>
+      <li>
+      <span class="rfc2119-assertion" id="td-signature-validation--query">
+      All <code>reference</code> queries MUST be performed as described for the signing process.
+      </span>
+      </li>
+      <li>
+      <span class="rfc2119-assertion" id="td-signature-validation--hash">
+      The <code>digest</code> computation MUST be performed as described for the signing process.
+      </span>
+      </li>
+      <li>
+      <span class="rfc2119-assertion" id="td-signature-validation--sign">
+      The <code>sig</code> computation MUST be performed as described for the signing process, 
+      and the validation process appropriate for the signature type performed as specified in 
+      JWS [[RFC7515]], JWA [[RFC7518]] and extensions [[RFC8037]].
+      </span>
+      Note that in general validation is not as simple as comparing signature values.
+      The specific validation process for each signature 
+      type needs to be followed as specified,
+      and may require additional inputs, such as keys.
+      </li>
+      </ol>
+      </p><p>
+      The <code>reference</code> values in <code>SignedInfo</code> objects
+      can include previous <code>Signature</code> objects, 
+      allowing signatures to be chained.
+      Inserting the new <code>Signature</code> object at the end of any existing
+      <code>signatures</code> array makes it easier to stably select existing signatures using
+      references such as JSON Pointers.
+      </p>
+      <p class="ednote" title="Relationship to Linked Data Signatures">
+      A parallel effort is being made to define signatures for RDF datasets,
+      called Linked Data Signatures (LDS). 
+      This can be applied to JSON-LD files.
+      The current LDS proposal, however, would require the
+      conversion of a JSON-LD file into a sorted set of RDF triples, and so would
+      require RDF processing.  The current definition of EJS Signatures
+      requires only JSON processing, so we expect both to be
+      useful in different circumstances.</p>
+  </section>
+</section>
+
+<section id="changes" class="appendix">
+  <h1>Recent Specification Changes</h1>
+  Initial draft.
+</section>
+
+<section id="acknowledgements" class="appendix normative">
+  <h1>Acknowledgements</h1>
+  <p>Thanks to Ege Korkan and Oliver Pfaff for providing detailed feedback on the initial draft.
+  </p>
+</section>
+
+<p class="note">
+    Temporary ReSpec fix regarding non-listed references: [[RFC6068]], [[RFC3966]], [[html]], [[RFC6750]],  [[RFC7519]],  [[RFC7797]],  [[RFC8392]],  [[RFC7516]], [[LDML]],  [[SEMVER]], [[RFC7617]], [[RFC7616]] 
+</p>
+
+</body>
+</html>
